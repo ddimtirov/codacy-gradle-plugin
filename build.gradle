@@ -1,0 +1,40 @@
+plugins {
+    id 'com.gradle.build-scan' version '1.6'
+    id 'com.gradle.plugin-publish' version '0.9.7'
+    id "net.ltgt.errorprone" version "0.0.9"
+    id "org.standardout.versioneye" version "1.4.0"
+    id 'com.github.ben-manes.versions' version '0.14.0' // gradlew dependencyUpdates
+    id "java-gradle-plugin"
+    id "maven-publish"
+    id "groovy"
+}
+
+group 'io.github.ddimtirov'
+description 'Codacy.io integration for Gradle'
+
+dependencies {
+    testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3') { exclude module: 'groovy-all' }
+}
+
+gradlePlugin {
+    plugins {
+        codacy {
+            id = "io.github.ddimtirov.codacy"
+            implementationClass = "io.github.ddimtirov.gradle.codacy.CodacyPlugin"
+        }
+    }
+}
+
+pluginBundle {
+    website = 'http://www.gradle.org/'
+    vcsUrl = 'https://github.com/gradle/gradle'
+    description = 'Override description for this plugin'
+    tags = ['different', 'for', 'this', 'one']
+
+    plugins {
+        goodbyePlugin {
+            id = 'org.samples.goodbye'
+            displayName = 'Gradle Goodbye plugin'
+        }
+    }
+}
