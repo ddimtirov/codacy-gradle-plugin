@@ -1,10 +1,12 @@
-A Gradle plugin, uploading code coverage results to [Codacy.com](https://www.codacy.com/).
-I am creating it because [jpm4j](http://jpm4j.org/) broke recently, and I find the 
-[proposed](https://github.com/codacy/codacy-coverage-reporter)
-[workarounds](https://github.com/mountain-pass/hyperstate/commit/857ca93e1c8484c14a5e2da9f0434d3daf3328ce)
- are clumsy and involving copy/paste of lumps of code or jitpacking something from a github repo.
+A [Gradle plugin](https://plugins.gradle.org/plugin/io.github.ddimtirov.codacy), 
+uploading code coverage results to [Codacy.com](https://www.codacy.com/).
 
-When/if Codacy provide official plugin, this plugin will be deprecated.
+I am creating it only because [jpm4j](http://jpm4j.org/) broke recently, and I dislike 
+[proposed](https://github.com/codacy/codacy-coverage-reporter)
+[workarounds](https://github.com/mountain-pass/hyperstate/commit/857ca93e1c8484c14a5e2da9f0434d3daf3328ce),
+involving copy/paste of lumps of code or jitpacking something from a github repo.
+When/if Codacy provide official plugin, this plugin will be immediately deprecated and unsupported.
+Meanwhile feel free to create issues int he Github tracker.
 
 # Migrating from working TravisCI setup
 Open your `build.gradle` file and add this line to the `plugins` section (you may also remove 
