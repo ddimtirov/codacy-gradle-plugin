@@ -56,3 +56,7 @@ codacy {
     projectToken = 'fe12d3a13ce28cb7b3c2873b46'
 }
 ```
+
+# Credits
+* @tompahoward for creating the [initial Gradle integration recipe](https://github.com/mountain-pass/hyperstate/commit/857ca93e1c8484c14a5e2da9f0434d3daf3328ce)  from which I have borrowed.
+* @MrRamych for creating the second recipe, leveraging jitpack.io to get the latest and greatest code.
