@@ -9,17 +9,14 @@ When/if Codacy provide official plugin, this plugin will be immediately deprecat
 Meanwhile feel free to create issues int he Github tracker.
 
 # Migrating from working TravisCI setup
+In your `.travis.yml` delete all references to JPM downloading and running things, 
+then add `codacyUpload` to the tasks of the Gradle invocation.
+
 Open your `build.gradle` file and add this line to the `plugins` section (you may also remove 
 `jacoco` while you are at it):
 
 ```
 id "io.github.ddimtirov.codacy" version "0.1.0"
-```
-
-Then add this line after the `plugins` section:
-
-```
-repositories.maven { url "http://dl.bintray.com/typesafe/maven-releases" } // FIXME: codacy uploader needs this
 ```
 
 Done!
