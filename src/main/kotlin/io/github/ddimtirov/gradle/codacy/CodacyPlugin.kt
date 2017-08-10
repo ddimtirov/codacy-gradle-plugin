@@ -25,31 +25,29 @@ open class CodacyPlugin : Plugin<Project> {
 
             configurations {
                 "codacy" {
-                    defaultDependencies { defaultDeps ->
-                        defaultDeps.add(project.dependencies.create("com.codacy:codacy-coverage-reporter:${codacyExt.toolVersionProvider}"))
+                    defaultDependencies {
+                        add(project.dependencies.create("com.codacy:codacy-coverage-reporter:${codacyExt.toolVersionProvider}"))
                     }
                 }
             }
 
-            tasks {
-                "codacyUpload" {
-                    group = "publishing"
-                    description = "Upload all coverage reports to Codacy.com"
-                }
+            val codacyUpload by tasks.creating {
+                group = "publishing"
+                description = "Upload all coverage reports to Codacy.com"
             }
-            val codacyUploadTask = tasks["codacyUpload"]
 
-            pluginManager.apply(JacocoPlugin::class.java)
-            tasks.withType(JacocoReport::class.java) { reportTask ->
-                reportTask.reports.xml.isEnabled = true
-                project.tasks.create("${reportTask.name}CodacyUpload", CodacyUploadTask::class.java) { uploadTask ->
-                    uploadTask.group = "publishing"
-                    uploadTask.description = "Upload $reportTask.name to Codacy.com"
-                    uploadTask.coverageReport = reportTask.reports.xml.destination
-                    uploadTask.defaultCommitUuid(codacyExt.commitUuidProvider)
-                    uploadTask.defaultProjectToken(codacyExt.projectTokenProvider)
-                    uploadTask.dependsOn(reportTask)
-                    codacyUploadTask.dependsOn(uploadTask)
+            plugins.apply(JacocoPlugin::class.java)
+            tasks.withType(JacocoReport::class.java) {
+                val reportTask = this
+                reports.xml.isEnabled = true
+                tasks.create("${reportTask.name}CodacyUpload", CodacyUploadTask::class.java) {
+                    group = "publishing"
+                    description = "Upload ${reportTask.name} to Codacy.com"
+                    coverageReport = reports.xml.destination
+                    defaultCommitUuid(codacyExt.commitUuidProvider)
+                    defaultProjectToken(codacyExt.projectTokenProvider)
+                    dependsOn(reportTask)
+                    codacyUpload.dependsOn(this)
                 }
             }
         }
@@ -70,7 +68,7 @@ open class CodacyExtension(project: Project) {
     var projectToken by projectTokenState
 }
 
-open class CodacyUploadTask @Inject constructor (val workerExecutor: WorkerExecutor): DefaultTask() {
+open class CodacyUploadTask @Inject constructor (private val workerExecutor: WorkerExecutor): DefaultTask() {
     private val commitUuidState = project.property<String?>()
     private val projectTokenState = project.property<String?>()
 
@@ -88,10 +86,10 @@ open class CodacyUploadTask @Inject constructor (val workerExecutor: WorkerExecu
 
 
     @TaskAction fun publishCoverageToCodacy() {
-        workerExecutor.submit(CodacyUploadUow::class.java) { cfg ->
-            cfg.isolationMode = IsolationMode.CLASSLOADER
-            cfg.classpath = project.configurations["codacy"]
-            cfg.params(coverageReport, commitUuid, projectToken)
+        workerExecutor.submit(CodacyUploadUow::class.java) {
+            isolationMode = IsolationMode.CLASSLOADER
+            classpath = project.configurations["codacy"]
+            params(coverageReport, commitUuid, projectToken)
         }
     }
 }
