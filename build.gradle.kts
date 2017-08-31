@@ -8,6 +8,11 @@ plugins {
 group = "io.github.ddimtirov"
 description = "Codacy.io integration for Gradle"
 
+repositories.jcenter()
+dependencies {
+    testImplementation("junit:junit:4.12")
+}
+
 pluginBundle {
     description = "Upload Jacoco coverage reports to Codacy.com"
     website = "https://github.com/ddimtirov/codacy-gradle-plugin"

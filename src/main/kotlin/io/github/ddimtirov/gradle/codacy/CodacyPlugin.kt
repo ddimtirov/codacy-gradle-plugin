@@ -22,11 +22,13 @@ open class CodacyPlugin : Plugin<Project> {
         project.run {
             val codacyExt = extensions.create("codacy", CodacyExtension::class.java, project)
             codacyExt.toolVersion = "1.0.7"
+            codacyExt.projectToken = null
+            codacyExt.commitUuid = null
 
             configurations {
                 "codacy" {
                     defaultDependencies {
-                        add(project.dependencies.create("com.codacy:codacy-coverage-reporter:${codacyExt.toolVersionProvider}"))
+                        add(project.dependencies.create("com.codacy:codacy-coverage-reporter:${codacyExt.toolVersion}"))
                     }
                 }
             }
@@ -54,6 +56,7 @@ open class CodacyPlugin : Plugin<Project> {
     }
 }
 
+// TODO: do we need separate state, prop and provider? What is the downside of exposing the PropertyState directly?
 open class CodacyExtension(project: Project) {
     private val toolVersionState = project.property<String>()
     private val commitUuidState = project.property<String?>()
@@ -68,6 +71,7 @@ open class CodacyExtension(project: Project) {
     var projectToken by projectTokenState
 }
 
+// TODO: do we need the separation of state, default-setter and delegated property? Can we make it more compact?
 open class CodacyUploadTask @Inject constructor (private val workerExecutor: WorkerExecutor): DefaultTask() {
     private val commitUuidState = project.property<String?>()
     private val projectTokenState = project.property<String?>()
@@ -75,19 +79,21 @@ open class CodacyUploadTask @Inject constructor (private val workerExecutor: Wor
     fun defaultCommitUuid(commitUuid: Provider<String?>) = commitUuidState.set(commitUuid)
     fun defaultProjectToken(projectToken: Provider<String?>) = projectTokenState.set(projectToken)
 
+    // TODO: do we really need @Option, @Optional and @Input? Especially the last can be implied?
+    // FIXME: it appears that @Optional and providers don't work together well - see the BasicBuildTest
     @get:Option(option="commit-uuid", description="Commit UUID used by Codacy to track the current results. Typically inferred from the environment.")
     @get:Optional @get:Input var commitUuid by commitUuidState
 
     @get:Option(option="codacy-token", description="Codacy project token. Typically inferred from the environment.")
     @get:Optional @get:Input var projectToken by projectTokenState
 
-    // TODO: is lateinit the best idiom here?
+    // TODO: is lateinit the best idiom here? Can we initialize somehow with provider/delegate?
     @get:InputFile lateinit var coverageReport: File
 
 
     @TaskAction fun publishCoverageToCodacy() {
         workerExecutor.submit(CodacyUploadUow::class.java) {
-            isolationMode = IsolationMode.CLASSLOADER
+            isolationMode = IsolationMode.PROCESS
             classpath = project.configurations["codacy"]
             params(coverageReport, commitUuid, projectToken)
         }
@@ -99,11 +105,11 @@ open class CodacyUploadUow @Inject constructor (val coverageReport: File, val co
         val codacyUploaderMain = Class.forName("com.codacy.CodacyCoverageReporter").getDeclaredMethod("main", Array<String>::class.java)
         val commitOpts = commitUuid?.let { arrayOf("--commitUUID", it) } ?: emptyArray()
         val tokenOpts = projectToken?.let { arrayOf("--projectToken", it) } ?: emptyArray()
-        codacyUploaderMain.invoke(null,
-                "-l", "Java",
-                "-r", coverageReport,
+        codacyUploaderMain.invoke(null, arrayOf(
+                "--language", "Java",
+                "--coverageReport", coverageReport.canonicalPath,
                 *commitOpts,
                 *tokenOpts
-        )
+        ))
     }
 }
