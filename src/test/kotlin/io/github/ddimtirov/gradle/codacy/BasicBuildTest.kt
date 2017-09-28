@@ -1,5 +1,6 @@
 package io.github.ddimtirov.gradle.codacy
 
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome.SUCCESS
 import org.junit.Assert.assertEquals
@@ -42,12 +43,7 @@ class BuildLogicFunctionalTest {
     }
 
     @Test fun testPlainBuild() {
-        val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
-                .withPluginClasspath()
-                .withArguments("test", "jacocoTestReport", "jacocoTestReportCodacyUpload", "-s")
-                .build()
-
+        val result = runGradle("test", "jacocoTestReport", "jacocoTestReportCodacyUpload", "-s")
         assertEquals(result.task(":jacocoTestReport")!!.outcome, SUCCESS)
         assertEquals(result.task(":jacocoTestReportCodacyUpload")!!.outcome, SUCCESS)
     }
@@ -59,26 +55,28 @@ class BuildLogicFunctionalTest {
                 projectToken = "my secret token"
             }
         """)
-        val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
-                .withPluginClasspath()
-                .withArguments("test", "jacocoTestReport", "jacocoTestReportCodacyUpload", "-s")
-                .build()
-
+        val result = runGradle("test", "jacocoTestReport", "jacocoTestReportCodacyUpload", "-s")
         assertEquals(result.task(":jacocoTestReport")!!.outcome, SUCCESS)
         assertEquals(result.task(":jacocoTestReportCodacyUpload")!!.outcome, SUCCESS)
     }
 
     @Test fun testCmdLineOptionsBuild() {
-        val result = GradleRunner.create()
-                .withProjectDir(testProjectDir.root)
-                .withPluginClasspath()
-                .withArguments("test", "jacocoTestReport", "jacocoTestReportCodacyUpload", "-s",
-                        "--commit-uuid", "abc123",
-                        "--project-token", "secrettoken")
-                .build()
+        val result = runGradle(
+                "test", "jacocoTestReport", "jacocoTestReportCodacyUpload", "-s",
+                "--commit-uuid", "abc123",
+                "--project-token", "secrettoken"
+        )
 
         assertEquals(result.task(":jacocoTestReport")!!.outcome, SUCCESS)
         assertEquals(result.task(":jacocoTestReportCodacyUpload")!!.outcome, SUCCESS)
+    }
+
+    private fun runGradle(vararg args: String): BuildResult {
+        return GradleRunner.create()
+                .withDebug(true)
+                .withProjectDir(testProjectDir.root)
+                .withPluginClasspath()
+                .withArguments(*args)
+                .build()
     }
 }

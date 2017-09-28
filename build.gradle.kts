@@ -1,5 +1,5 @@
 plugins {
-    id("com.gradle.build-scan") version "1.8"
+    id("com.gradle.build-scan") version "1.9"
     id("com.gradle.plugin-publish") version "0.9.7"
     `java-gradle-plugin`
     `kotlin-dsl`

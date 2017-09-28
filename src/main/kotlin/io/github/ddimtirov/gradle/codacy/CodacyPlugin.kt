@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package io.github.ddimtirov.gradle.codacy
 
 import org.gradle.api.DefaultTask
@@ -100,7 +102,11 @@ open class CodacyUploadTask @Inject constructor (private val workerExecutor: Wor
     }
 }
 
-open class CodacyUploadUow @Inject constructor (val coverageReport: File, val commitUuid: String?, val projectToken: String?) : Runnable {
+open class CodacyUploadUow @Inject constructor (
+        private val coverageReport: File,
+        private val commitUuid: String?,
+        private val projectToken: String?
+) : Runnable {
     override fun run() {
         val codacyUploaderMain = Class.forName("com.codacy.CodacyCoverageReporter").getDeclaredMethod("main", Array<String>::class.java)
         val commitOpts = commitUuid?.let { arrayOf("--commitUUID", it) } ?: emptyArray()
