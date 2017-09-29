@@ -83,10 +83,11 @@ open class CodacyUploadTask @Inject constructor (private val workerExecutor: Wor
 
     // TODO: do we really need @Option, @Optional and @Input? Especially the last can be implied?
     // FIXME: it appears that @Optional and providers don't work together well - see the BasicBuildTest
-    @get:Option(option="commit-uuid", description="Commit UUID used by Codacy to track the current results. Typically inferred from the environment.")
+    // FIXME: important that @Option annotates the setter
+    @set:Option(option="commit-uuid", description="Commit UUID used by Codacy to track the current results. Typically inferred from the environment.")
     @get:Optional @get:Input var commitUuid by commitUuidState
 
-    @get:Option(option="codacy-token", description="Codacy project token. Typically inferred from the environment.")
+    @set:Option(option="codacy-token", description="Codacy project token. Typically inferred from the environment.")
     @get:Optional @get:Input var projectToken by projectTokenState
 
     // TODO: is lateinit the best idiom here? Can we initialize somehow with provider/delegate?

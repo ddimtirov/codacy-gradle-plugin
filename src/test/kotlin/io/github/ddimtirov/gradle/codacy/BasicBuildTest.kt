@@ -64,7 +64,7 @@ class BuildLogicFunctionalTest {
         val result = runGradle(
                 "test", "jacocoTestReport", "jacocoTestReportCodacyUpload", "-s",
                 "--commit-uuid", "abc123",
-                "--project-token", "secrettoken"
+                "--codacy-token", "secrettoken"
         )
 
         assertEquals(result.task(":jacocoTestReport")!!.outcome, SUCCESS)
